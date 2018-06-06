@@ -15,11 +15,19 @@ var s = flag.Int("s", 5, "Duration of a short break")
 var l = flag.Int("l", 15, "Duration of a long break")
 var p = flag.String("p", "wswswl", "Pattern to  follow (for example wswswl)")
 
+const DURATION_PRFIX = "  ["
+const DURATION_SUFFIX = "]"
 
-type Pomodoro struct { 
+type Pomodoro struct {
     curr_state string
 }
 
+func (p *Pomodoro) Timestamp(duration_min *int) string {
+    t := time.Now()
+    after := t.Add(time.Duration(*duration_min) * time.Minute)
+
+    return t.Format("15:04:05") + " - " + after.Format("15:04:05")
+}
 
 func (p *Pomodoro) Notify(summary string, body string, isUrgent bool) {
     if isUrgent {
@@ -33,16 +41,19 @@ func (p *Pomodoro) Notify(summary string, body string, isUrgent bool) {
 
 func (p *Pomodoro) Work(duration *int, num int) {
     p.Notify(HEADLINE, "Start Working!", false)
+    fmt.Println(DURATION_PRFIX + p.Timestamp(duration) + DURATION_SUFFIX)
 
     timer1 := time.NewTimer(time.Minute * time.Duration(*duration))
 
     <-timer1.C
     fmt.Printf("    ☑ %d. Working phase\n", num)
+    //fmt.Printf("    ☑ %d. Working phase:\n", num)
 }
 
 
 func (p *Pomodoro) ShortBreak(duration *int) {
     p.Notify(HEADLINE, "Take a BREAK", true)
+    fmt.Println(DURATION_PRFIX + p.Timestamp(duration) + DURATION_SUFFIX)
 
     timer1 := time.NewTimer(time.Minute * time.Duration(*duration))
 
@@ -52,6 +63,7 @@ func (p *Pomodoro) ShortBreak(duration *int) {
 
 func (p *Pomodoro) LongBreak (duration *int) {
     p.Notify(HEADLINE, "Take a long BREAK", true)
+    fmt.Println(DURATION_PRFIX + p.Timestamp(duration) + DURATION_SUFFIX)
 
     timer1 := time.NewTimer(time.Minute * time.Duration(*duration))
 
